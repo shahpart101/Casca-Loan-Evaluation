@@ -38,7 +38,8 @@ const FileUpload = () => {
       console.log(`📂 Uploading file: ${file.name}`);
 
       // Use an environment variable for the API URL
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000/upload/";
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://casca-loan-evaluation.onrender.com/upload/";
+
 
       const response = await axios.post(apiUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
