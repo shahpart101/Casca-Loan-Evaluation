@@ -1,0 +1,13 @@
+{
+    "name": "casca-loan-evaluation",
+    "version": "1.0.0",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+    },
+    "dependencies": {
+      "concurrently": "^8.0.0"
+    }
+  }
+  
