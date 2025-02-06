@@ -1,0 +1,18 @@
+# Ignore environment variables
+.env
+
+# Ignore Python cache and compiled files
+__pycache__/
+*.pyc
+
+# Ignore node_modules (for your frontend)
+node_modules/
+
+# Ignore system files
+.DS_Store
+
+# Ignore output files
+*.log
+output.txt
+temp_output.txt
+.env
