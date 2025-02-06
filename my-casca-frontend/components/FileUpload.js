@@ -46,6 +46,7 @@ const FileUpload = ({ setEvaluationData }) => {
       // Hardcoded API URL for production (Replace with your live Render backend URL)
       const apiUrl = "https://casca-loan-evaluation.onrender.com/upload/";
 
+
       const response = await axios.post(apiUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
