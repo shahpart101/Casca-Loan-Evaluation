@@ -5,7 +5,7 @@ const nextConfig = {
       return [
         {
           source: '/api/:path*',
-          destination: 'https://your-api-service.onrender.com/:path*' // Use your actual Render URL
+          destination: 'https://casca-loan-evaluation.onrender.com/:path*' // Use your actual Render URL 
         }
       ];
     },
