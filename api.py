@@ -157,11 +157,15 @@ async def deep_analysis(data: dict):
         raise HTTPException(status_code=500, detail="OpenAI API key not found. Please set OPENAI_API_KEY.")
 
     prompt = f"""
-    You are a financial analyst. Given these metrics:
-    {data}
+You are a financial analyst for a fintech company. Given the following financial metrics:
+{data}
 
-    Provide a detailed financial summary, red flags, and suggestions for improving financial health.
-    """
+1. Assess the borrower's financial stability.
+2. Determine if Casca should approve or decline a loan.
+3. Recommend a risk-adjusted interest rate based on market conditions.
+4. Explain how Casca can maximize profits while minimizing risk.
+"""
+
 
     try:
         response = client.chat.completions.create(

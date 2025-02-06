@@ -7,6 +7,13 @@ import joblib
 import os
 from datetime import datetime
 
+###############################
+# 🔹 Dynamic Interest Rate Logic
+###############################
+# Ideally, fetch the federal interest rate dynamically via an API.
+# For now, we set a static example rate.
+FEDERAL_INTEREST_RATE = 5.25  # Example: Adjust if needed
+
 def calculate_cashflow_features(df):
     """Calculate financial metrics from transaction data"""
     features = {
@@ -78,7 +85,7 @@ def main():
         # Check if dataset is large enough to split
         if len(X) < 5:
             print("\n⚠️ Not enough data to split into train and test sets. Training on all data.")
-            model = RandomForestClassifier(n_estimators=100, random_state=42)
+            model = RandomForestClassifier(n_estimators=300, random_state=42)
             model.fit(X, y)
         else:
             X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
@@ -111,9 +118,19 @@ def main():
         print("\n🔄 Model file deleted. Please run the script again to retrain the model.")
         return
 
-    # Determine loan terms
-    risk_category = 'High' if risk_score > 75 else 'Moderate' if risk_score > 40 else 'Low'
-    interest_rate = 12.0 if risk_category == 'High' else 9.5 if risk_category == 'Moderate' else 7.0
+    ###############################
+    # 🔹 Updated Interest Rate Calculation
+    ###############################
+    # Adjusting interest rate margins based on risk category
+    if risk_score > 75:
+        risk_category = "High"
+        interest_rate = FEDERAL_INTEREST_RATE + 6.75  # Higher risk, more margin
+    elif risk_score > 40:
+        risk_category = "Moderate"
+        interest_rate = FEDERAL_INTEREST_RATE + 4.25
+    else:
+        risk_category = "Low"
+        interest_rate = FEDERAL_INTEREST_RATE + 2.5  # Low risk, closer to base rate
 
     # Save results
     results = pd.DataFrame({
