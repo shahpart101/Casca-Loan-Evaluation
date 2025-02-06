@@ -1,12 +1,11 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
     content: [
-      "./pages/**/*.{js,ts,jsx,tsx}",
-      "./components/**/*.{js,ts,jsx,tsx}"
+      "./my-casca-frontend/**/*.{js,ts,jsx,tsx}",  // Adjusted to match your folder structure
     ],
     theme: {
-      extend: {}
+      extend: {},
     },
-    plugins: []
+    plugins: [],
   };
   
