@@ -9,19 +9,20 @@ const FileUpload = () => {
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
-
     if (!selectedFile) {
       console.error("❌ No file selected.");
       setError("Please select a file before uploading.");
       return;
     }
-
     setFile(selectedFile);
     setError(null);
     console.log(`📂 Selected file: ${selectedFile.name}`);
   };
 
   const handleUpload = async () => {
+    // Debug log to ensure the upload function is triggered
+    console.log("Upload button clicked!");
+
     if (!file) {
       setError("No file selected! Please choose a file.");
       return;
@@ -37,9 +38,8 @@ const FileUpload = () => {
     try {
       console.log(`📂 Uploading file: ${file.name}`);
 
-      // Use an environment variable for the API URL
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "https://casca-loan-evaluation.onrender.com/upload/";
-
+      // Hardcoded API URL for production (Render backend)
+      const apiUrl = "https://casca-loan-evaluation.onrender.com/upload/";
 
       const response = await axios.post(apiUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
@@ -59,7 +59,11 @@ const FileUpload = () => {
     <div className="p-4 bg-white rounded-xl shadow-md">
       <h2 className="text-xl font-bold mb-2">Upload a PDF for Loan Evaluation</h2>
 
-      <input type="file" onChange={handleFileChange} className="mb-4 border p-2 rounded-md" />
+      <input
+        type="file"
+        onChange={handleFileChange}
+        className="mb-4 border p-2 rounded-md"
+      />
 
       {error && <p className="text-red-500">{error}</p>}
 
@@ -84,3 +88,4 @@ const FileUpload = () => {
 };
 
 export default FileUpload;
+
