@@ -11,7 +11,12 @@ from openai import OpenAI
 # Initialize FastAPI
 app = FastAPI()
 
-# Configure CORS
+# ✅ Root endpoint to confirm backend is live
+@app.get("/")
+def home():
+    return {"message": "Casca Backend is Running!"}
+
+# ✅ Configure CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -20,7 +25,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load Risk Model
+# ✅ Load Risk Model
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "backend/models/cash_flow_risk_model.pkl")
 
 if os.path.exists(MODEL_PATH):
@@ -29,16 +34,14 @@ if os.path.exists(MODEL_PATH):
 else:
     raise FileNotFoundError("❌ Model file not found. Ensure it's in the 'models' directory.")
 
-#####################
-# PDF Extraction Function
-#####################
+# ✅ PDF Extraction Function
 def extract_pdf_to_csv(pdf_file_path):
     output_txt = "backend/temp_output.txt"
     output_csv = "backend/temp_structured_output.csv"
 
     # Check if pdftotext is installed
     if subprocess.run(["which", "pdftotext"], capture_output=True, text=True).returncode != 0:
-        raise FileNotFoundError("❌ `pdftotext` is not installed. Install it via `brew install poppler` (Mac) or `apt install poppler-utils` (Linux).")
+        raise FileNotFoundError("❌ `pdftotext` is not installed. Install via `brew install poppler` (Mac) or `apt install poppler-utils` (Linux).")
 
     # Convert PDF to text
     try:
@@ -50,21 +53,15 @@ def extract_pdf_to_csv(pdf_file_path):
     with open(output_txt, "r", encoding="utf-8", errors="ignore") as file:
         text = file.read()
 
-    # Regular expressions for dates and amounts
+    # Extract data using regex
     date_pattern = r'\d{2}-[A-Za-z]{3}-\d{4}'
     amount_pattern = r'\d{1,3}(?:,\d{3})*(?:\.\d{2})'
-
-    # Split by date to identify transactions
     entries = re.split(f'({date_pattern})', text)
     transactions = []
 
     for i in range(1, len(entries) - 1, 2):
         date = entries[i].strip()
         details = entries[i + 1].strip().split("\n")
-
-        if not details[0].strip():
-            continue
-
         description = " ".join([line.strip() for line in details if not re.match(date_pattern, line)])
         amounts = re.findall(amount_pattern, entries[i + 1])
 
@@ -81,14 +78,11 @@ def extract_pdf_to_csv(pdf_file_path):
             balance.replace(",", "")
         ])
 
-    # Write to CSV
+    # ✅ Write to CSV
     pd.DataFrame(transactions, columns=["Date", "Description", "Debit", "Credit", "Balance"]).to_csv(output_csv, index=False)
-
     return output_csv
 
-#####################
-# /upload/ Endpoint
-#####################
+# ✅ /upload/ Endpoint
 @app.post("/upload/")
 async def upload_file(file: UploadFile = File(...)):
     print(f"📂 Received file: {file.filename}")  # Debugging print
@@ -116,13 +110,13 @@ async def upload_file(file: UploadFile = File(...)):
         if os.path.exists(csv_path):
             os.remove(csv_path)
 
-    # Data Cleaning
+    # ✅ Data Cleaning
     df["Debit"] = pd.to_numeric(df["Debit"], errors="coerce").fillna(0)
     df["Credit"] = pd.to_numeric(df["Credit"], errors="coerce").fillna(0)
     df["Balance"] = pd.to_numeric(df["Balance"], errors="coerce").fillna(0)
     df["Net Flow"] = df["Credit"] - df["Debit"]
 
-    # Feature Engineering
+    # ✅ Feature Engineering
     features = pd.DataFrame({
         "AnomaliesCount": [len(df[(df["Debit"] > 5000) | (df["Credit"] > 10000)])],
         "AvgBalance": [df["Balance"].mean()],
@@ -130,8 +124,9 @@ async def upload_file(file: UploadFile = File(...)):
         "TotalDeposits": [df["Credit"].sum()],
         "TotalWithdrawals": [df["Debit"].sum()],
         "FlowVolatility": [df["Net Flow"].std()]
-    }).fillna(0)  # Prevent NaN values
+    }).fillna(0)
 
+    # ✅ Predict Risk Score
     try:
         risk_score = model.predict_proba(features)[:, 1][0] * 100
     except Exception as e:
@@ -146,9 +141,7 @@ async def upload_file(file: UploadFile = File(...)):
         "InterestRate": interest_rate
     })
 
-#####################
-# /deep_analysis/ (Fixed OpenAI Integration)
-#####################
+# ✅ /deep_analysis/ (Fixed OpenAI Integration)
 @app.post("/deep_analysis/")
 async def deep_analysis(data: dict):
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -165,7 +158,6 @@ You are a financial analyst for a fintech company. Given the following financial
 3. Recommend a risk-adjusted interest rate based on market conditions.
 4. Explain how Casca can maximize profits while minimizing risk.
 """
-
 
     try:
         response = client.chat.completions.create(
@@ -184,6 +176,7 @@ You are a financial analyst for a fintech company. Given the following financial
 
     return JSONResponse(content={"analysis": text_result})
 
+# ✅ Start Uvicorn Server for Local Testing
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
